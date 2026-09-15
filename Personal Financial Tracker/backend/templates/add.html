@@ -5,6 +5,15 @@
 </head>
 <body>
     <h1>Add Transaction</h1>
+
+    {% if errors %}
+    <ul style="color:red;">
+        {% for e in errors %}
+        <li>{{ e }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
     <form method="POST">
         <label>Amount:</label>
         <input type="number" step="0.01" name="amount" required><br><br>
