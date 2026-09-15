@@ -4,11 +4,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+# Resolves to backend/static/charts regardless of the working directory
+# the calling script was launched from.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # .../analytics
 CHART_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "backend", "static", "charts"))
 
+
 def _ensure_dir():
     os.makedirs(CHART_DIR, exist_ok=True)
+
 
 def plot_spend_by_category(series, filename="spend_by_category.png"):
     _ensure_dir()
@@ -24,6 +28,7 @@ def plot_spend_by_category(series, filename="spend_by_category.png"):
     plt.savefig(path)
     plt.close()
     return path
+
 
 def plot_monthly_summary(summary_df, filename="monthly_summary.png"):
     _ensure_dir()
@@ -43,6 +48,7 @@ def plot_monthly_summary(summary_df, filename="monthly_summary.png"):
     plt.close()
     return path
 
+
 def plot_top_categories(series, filename="top_categories.png"):
     _ensure_dir()
     path = os.path.join(CHART_DIR, filename)
@@ -57,12 +63,13 @@ def plot_top_categories(series, filename="top_categories.png"):
     plt.close()
     return path
 
+
 def plot_daily_trend(daily_df, filename="daily_trend.png"):
     _ensure_dir()
     path = os.path.join(CHART_DIR, filename)
 
     plt.figure(figsize=(9, 5))
-    plt.plot(daily_df.index, daily_df["running_balance"], marker=None)
+    plt.plot(daily_df.index, daily_df["running_balance"])
     plt.xlabel("Date")
     plt.ylabel("Running Balance")
     plt.title("Balance Over Time")
@@ -71,4 +78,3 @@ def plot_daily_trend(daily_df, filename="daily_trend.png"):
     plt.savefig(path)
     plt.close()
     return path
-
