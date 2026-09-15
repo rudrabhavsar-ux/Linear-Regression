@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Category</title>
+</head>
+<body>
+    <h1>Edit Category</h1>
+    <form method="POST">
+        <label>Name:</label>
+        <input type="text" name="name" value="{{ category.name }}" required><br><br>
+
+        <label>Type:</label>
+        <select name="type" required>
+            <option value="income" {% if category.type == "income" %}selected{% endif %}>Income</option>
+            <option value="expense" {% if category.type == "expense" %}selected{% endif %}>Expense</option>
+        </select><br><br>
+
+        <button type="submit">Save</button>
+    </form>
+    <a href="{{ url_for('list_categories') }}">Back</a>
+</body>
+</html>
