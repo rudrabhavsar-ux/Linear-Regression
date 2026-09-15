@@ -1,160 +1,114 @@
+# Personal Finance Tracker
 
+A personal finance tracker with a Flask backend for data entry (CRUD)
+and a Streamlit dashboard for interactive analysis. Both apps read and
+write the same SQLite database through a shared `database/` package.
 
+## Features
 
-💰 Personal Financial Tracker
-A simple personal finance tracking application built with Python, Flask, SQLite, Pandas, NumPy, and Matplotlib.
+- Add, edit, delete transactions with server-side validation
+- Manage categories (income/expense)
+- Set monthly budgets per category, with progress tracking
+- Recurring transactions (weekly/monthly), run on demand
+- CSV export and import
+- pandas-powered analysis: monthly summaries, spend by category,
+  top categories, running balance over time
+- Static charts (matplotlib/seaborn) embedded in the Flask app
+- Interactive Streamlit dashboard with date/category/type filters
 
-The project helps users record and manage financial transactions while providing analytical insights through charts and visualizations.
+## Project structure
 
-🚀 Features
-Add financial transactions
-
-Edit existing transactions
-
-View transaction history
-
-Categorize transactions
-
-Track income and expenses
-
-Analyze spending patterns
-
-Generate financial visualizations
-
-View daily spending trends
-
-View monthly summaries
-
-Analyze spending by category
-
-Identify top spending categories
-
-Store transaction data using SQLite
-
-🛠️ Technologies Used
-Python — Core programming language
-
-Flask — Web application backend
-
-SQLite3 — Local database
-
-Pandas — Data analysis
-
-NumPy — Numerical operations
-
-Matplotlib — Data visualization
-
-HTML/CSS — Frontend
-
-📂 Project Structure
-Personal Financial Tracker/
-│
-├── analytics/
+```
+personal_financial_tracker/
+├── database/          # SQLite access layer (shared by both apps)
+│   ├── db.py           # connection helper
+│   ├── categories.py
+│   ├── transactions.py
+│   ├── budgets.py
+│   └── recurring.py
+├── analytics/          # pandas analysis + chart generation
 │   ├── analysis.py
 │   └── visuals.py
-│
-├── backend/
-│   ├── static/
-│   ├── templates/
-│   │   ├── add.html
-│   │   ├── edit.html
-│   │   └── index.html
-│   ├── __init__.py
-│   └── app.py
-│
-├── database/
-│   ├── __init__.py
-│   ├── categories.py
-│   ├── db.py
-│   └── transactions.py
-│
-├── static/
-│   └── charts/
-│
-├── .gitignore
-├── README.md
-└── requirements.txt
-⚙️ Installation
-1. Clone the repository
-git clone <your-repository-url>
-cd "Personal Financial Tracker"
-2. Create a virtual environment
+├── backend/             # Flask app (data entry / CRUD)
+│   ├── app.py
+│   ├── static/charts/    # generated PNGs (not committed)
+│   └── templates/
+└── dashboard/            # Streamlit app (analysis / viewing)
+    └── dashboard.py
+```
+
+`database/Personal.db` is created automatically the first time you run
+the setup commands below. Its location is resolved from `db.py`'s own
+file path, so both the Flask app and the Streamlit dashboard always
+read/write the same file no matter where you launch them from.
+
+## Setup
+
+```bash
 python -m venv venv
-3. Activate the virtual environment
-Windows
-venv\Scripts\activate
-macOS / Linux
-source venv/bin/activate
-4. Install dependencies
+source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-▶️ Running the Application
-Start the Flask application:
+```
 
-python backend/app.py
-Then open:
+## Initialize the database
 
-http://127.0.0.1:5000/
-in your browser.
+Run these once, in order, from the project root:
 
-📊 Analytics
-The analytics module handles transaction analysis and visualization.
+```bash
+python -m database.categories   # creates + seeds default categories
+python -m database.transactions # creates the transactions table
+python -m database.budgets      # creates the budgets table
+python -m database.recurring    # creates the recurring table
+```
 
-The project currently includes visualizations for:
+Each script is safe to re-run (`CREATE TABLE IF NOT EXISTS`, and
+category seeding uses `INSERT OR IGNORE`).
 
-Daily spending trends
+## Running the Flask app (data entry)
 
-Monthly financial summaries
+```bash
+cd backend
+python app.py
+```
 
-Spending by category
+Visit `http://127.0.0.1:5000`. From here you can add/edit/delete
+transactions, manage categories, set budgets, configure recurring
+transactions, and import/export CSVs.
 
-Top spending categories
+## Running the Streamlit dashboard (analysis)
 
-🗄️ Database
-The application uses SQLite3 to store financial transaction data.
+```bash
+streamlit run dashboard/dashboard.py
+```
 
-The local database file is intentionally excluded from the GitHub repository because it may contain personal financial information.
+Run this from the project root (or anywhere — it adds the project
+root to `sys.path` itself). Use the sidebar to filter by date range,
+category, and transaction type; every chart and metric on the page
+reacts to the filters.
 
-🔒 Privacy
-Do not commit personal financial data or secrets to the repository.
+Run both apps at the same time in separate terminals if you want to
+add data in Flask and immediately see it reflected in Streamlit
+(refresh the Streamlit page to pick up new data).
 
-The .gitignore file excludes:
+## CSV import format
 
-SQLite database files
+When importing via the Flask `/import` page, the CSV must contain
+these columns:
 
-Python cache files
+```
+amount, type, category_id, date
+```
 
-Virtual environments
+`note` is optional. `category_id` must match an existing category's
+ID (see the Categories page in the Flask app).
 
-Environment variables
+## Notes on design decisions
 
-Generated chart images
-
-IDE and operating-system files
-
-🔮 Future Improvements
-Some possible improvements for the project include:
-
-User authentication
-
-Multiple user accounts
-
-Budget tracking
-
-Savings goals
-
-Recurring transactions
-
-CSV export
-
-Interactive dashboards
-
-More advanced financial analytics
-
-Monthly financial reports
-
-Cloud deployment
-
-👨‍💻 Author
-Rudra Bhavsar
-
-Built as a personal finance tracking project using Python and Flask.
+- **Single-user**: no authentication, no `users` table.
+- **Categories are a DB table**, not a hardcoded list, so they can be
+  added/edited without touching code.
+- **Flask handles all writes**; Streamlit is read-only by design —
+  this was a deliberate choice to practice both frameworks rather
+  than collapsing everything into one app.
+- **Amounts are always stored positive**; the `type` column
+  (`income`/`expense`) determines direction.
