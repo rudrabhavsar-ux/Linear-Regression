@@ -1,5 +1,6 @@
 from .db import get_connection
 
+
 def create_table():
     con = get_connection()
     cursor = con.cursor()
@@ -12,6 +13,7 @@ def create_table():
     """)
     con.commit()
     con.close()
+
 
 def seed_categories():
     con = get_connection()
@@ -31,6 +33,7 @@ def seed_categories():
     con.commit()
     con.close()
 
+
 def get_all():
     con = get_connection()
     cursor = con.cursor()
@@ -38,6 +41,7 @@ def get_all():
     rows = cursor.fetchall()
     con.close()
     return rows
+
 
 def get_by_id(category_id):
     con = get_connection()
@@ -47,7 +51,32 @@ def get_by_id(category_id):
     con.close()
     return row
 
+
+def insert(name, type_):
+    con = get_connection()
+    cursor = con.cursor()
+    cursor.execute("INSERT INTO categories (name, type) VALUES (?, ?)", (name, type_))
+    con.commit()
+    con.close()
+
+
+def update(category_id, name, type_):
+    con = get_connection()
+    cursor = con.cursor()
+    cursor.execute("UPDATE categories SET name = ?, type = ? WHERE id = ?", (name, type_, category_id))
+    con.commit()
+    con.close()
+
+
+def delete(category_id):
+    con = get_connection()
+    cursor = con.cursor()
+    cursor.execute("DELETE FROM categories WHERE id = ?", (category_id,))
+    con.commit()
+    con.close()
+
+
 if __name__ == "__main__":
     create_table()
     seed_categories()
-    #print(get_all())
+    print(get_all())

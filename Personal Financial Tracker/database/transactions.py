@@ -1,5 +1,6 @@
 from .db import get_connection
 
+
 def create_table():
     con = get_connection()
     cursor = con.cursor()
@@ -18,6 +19,32 @@ def create_table():
     con.commit()
     con.close()
 
+
+def validate_transaction(amount, type_, category_id, date):
+    """Returns a list of human-readable error strings. Empty list = valid."""
+    errors = []
+
+    try:
+        amount = float(amount)
+        if amount <= 0:
+            errors.append("Amount must be greater than 0.")
+    except (ValueError, TypeError):
+        errors.append("Amount must be a valid number.")
+
+    if type_ not in ("income", "expense"):
+        errors.append("Type must be 'income' or 'expense'.")
+
+    try:
+        int(category_id)
+    except (ValueError, TypeError):
+        errors.append("Invalid category.")
+
+    if not date:
+        errors.append("Date is required.")
+
+    return errors
+
+
 def get_all():
     con = get_connection()
     cursor = con.cursor()
@@ -31,6 +58,7 @@ def get_all():
     con.close()
     return rows
 
+
 def get_by_id(transaction_id):
     con = get_connection()
     cursor = con.cursor()
@@ -43,7 +71,8 @@ def get_by_id(transaction_id):
     con.close()
     return row
 
-def insert(amount, type_, category_id, date, note):
+
+def insert(amount, type_, category_id, date, note=""):
     con = get_connection()
     cursor = con.cursor()
     cursor.execute("""
@@ -53,7 +82,8 @@ def insert(amount, type_, category_id, date, note):
     con.commit()
     con.close()
 
-def update(transaction_id, amount, type_, category_id, date, note):
+
+def update(transaction_id, amount, type_, category_id, date, note=""):
     con = get_connection()
     cursor = con.cursor()
     cursor.execute("""
@@ -64,6 +94,7 @@ def update(transaction_id, amount, type_, category_id, date, note):
     con.commit()
     con.close()
 
+
 def delete(transaction_id):
     con = get_connection()
     cursor = con.cursor()
@@ -71,5 +102,7 @@ def delete(transaction_id):
     con.commit()
     con.close()
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     create_table()
+    print(get_all())
